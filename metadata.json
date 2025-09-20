@@ -1,0 +1,5 @@
+{
+  "name": "Gestor de Registro e Inspección",
+  "description": "Una aplicación para gestionar, registrar y exportar pagos de derecho de registro e inspección. Permite agregar registros, visualizarlos en una tabla y exportarlos a formatos CSV (Excel) y PDF.",
+  "requestFramePermissions": []
+}

@@ -1,0 +1,21 @@
+{
+  "short_name": "Gestor DRI",
+  "name": "Gestor de Registro e Inspección",
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#ffffff",
+  "background_color": "#f8fafc",
+  "description": "Una aplicación para gestionar, registrar y exportar pagos de derecho de registro e inspección."
+}
