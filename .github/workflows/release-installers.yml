@@ -18,12 +18,12 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - name: Install deps (web)
-        run: npm ci
+        run: npm install
       - name: Build web
         run: npm run build
       - name: Install deps (wrapper)
         working-directory: WRAPPER
-        run: npm ci
+        run: npm install
       - name: Copy dist into wrapper
         run: |
           rm -rf WRAPPER/dist
@@ -49,12 +49,12 @@ jobs:
           node-version: '20'
           cache: 'npm'
       - name: Install deps (web)
-        run: npm ci
+        run: npm install
       - name: Build web
         run: npm run build
       - name: Install deps (wrapper)
         working-directory: WRAPPER
-        run: npm ci
+        run: npm install
       - name: Copy dist into wrapper
         shell: bash
         run: |
