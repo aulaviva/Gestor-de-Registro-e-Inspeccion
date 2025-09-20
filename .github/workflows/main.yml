@@ -1,0 +1,104 @@
+name: Release Desktop Installers
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    name: Build macOS DMG
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install deps (web)
+        run: npm install
+      - name: Build web
+        run: npm run build
+      - name: Install deps (wrapper)
+        working-directory: WRAPPER
+        run: npm install
+      - name: Copy dist into wrapper
+        run: |
+          rm -rf WRAPPER/dist
+          mkdir -p WRAPPER/dist
+          cp -r dist/* WRAPPER/dist/
+      - name: Pack macOS (DMG)
+        working-directory: WRAPPER
+        run: npm run pack:mac
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS-DMG
+          path: WRAPPER/release/*.dmg
+
+  build-windows:
+    name: Build Windows EXE
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install deps (web)
+        run: npm install
+      - name: Build web
+        run: npm run build
+      - name: Install deps (wrapper)
+        working-directory: WRAPPER
+        run: npm install
+      - name: Copy dist into wrapper
+        shell: bash
+        run: |
+          rm -rf WRAPPER/dist
+          mkdir -p WRAPPER/dist
+          cp -r dist/* WRAPPER/dist/
+      - name: Pack Windows (EXE)
+        working-directory: WRAPPER
+        run: npm run pack:win
+      - name: Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-EXE
+          path: WRAPPER/release/*.exe
+
+  create-release:
+    name: Create GitHub Release & Attach Assets
+    runs-on: ubuntu-latest
+    needs: [build-macos, build-windows]
+    steps:
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: macOS-DMG
+          path: dist_artifacts
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Windows-EXE
+          path: dist_artifacts
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            Instaladores del Gestor DRI:
+            - macOS (.dmg)
+            - Windows (.exe)
+          draft: false
+          prerelease: false
+          files: |
+            dist_artifacts/*.dmg
+            dist_artifacts/*.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
