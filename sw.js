@@ -6,7 +6,7 @@ const CORE_ASSETS = [
   '/index.css',
   '/vite.svg',
   '/icon-192x192.png',
-  '/icon-512x512.png'
+  '/icon-512x512.png',
 ];
 
 self.addEventListener('install', (event) => {
@@ -20,6 +20,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
 
   if (url.origin === self.location.origin) {
+    // For static assets (JS/CSS/images/fonts), use a cache-first strategy
     if (/\.(?:js|css|png|jpg|jpeg|svg|ico|webp|woff2?)$/.test(url.pathname)) {
       event.respondWith(
         caches.match(req).then((cached) => {
@@ -33,12 +34,16 @@ self.addEventListener('fetch', (event) => {
       );
       return;
     }
+
+    // For other requests (HTML and API), try the network first and fall back to cache
     event.respondWith(
-      fetch(req).then((res) => {
-        const resClone = res.clone();
-        caches.open(CACHE).then((cache) => cache.put(req, resClone));
-        return res;
-      }).catch(() => caches.match(req).then(r => r || caches.match('/')))
+      fetch(req)
+        .then((res) => {
+          const resClone = res.clone();
+          caches.open(CACHE).then((cache) => cache.put(req, resClone));
+          return res;
+        })
+        .catch(() => caches.match(req).then((r) => r || caches.match('/')))
     );
   }
 });
